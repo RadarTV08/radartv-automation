@@ -1,0 +1,1 @@
+print("RadarTV iniciado")
