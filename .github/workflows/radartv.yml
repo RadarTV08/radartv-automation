@@ -1,8 +1,6 @@
 name: RadarTV
 
 on:
-  schedule:
-    - cron: '0 9 * * *'  # 06h Brasil aproximadamente
   workflow_dispatch:
 
 jobs:
@@ -16,4 +14,8 @@ jobs:
         with:
           python-version: '3.12'
 
+      - run: pip install requests
+
       - run: python scripts/main.py
+        env:
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
