@@ -17,7 +17,7 @@ response = requests.post(url, json=input_data)
 
 run = response.json()
 
-run_id = run["data"]["id"]
+print(run)
 
 print("Execução iniciada:", run_id)
 
