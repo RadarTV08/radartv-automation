@@ -19,6 +19,8 @@ run = response.json()
 
 print(run)
 
+run_id = run["data"]["id"]
+
 print("Execução iniciada:", run_id)
 
 time.sleep(20)
