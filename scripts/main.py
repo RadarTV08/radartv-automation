@@ -8,7 +8,7 @@ actor_id = "api-ninja/youtube-search-scraper"
 
 input_data = {
     "query": "estudante de jornalismo",
-    "maxResults": 5
+    "maxResults": 20
 }
 
 url = f"https://api.apify.com/v2/acts/{actor_id.replace('/','~')}/runs?token={token}"
