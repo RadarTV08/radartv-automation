@@ -68,4 +68,45 @@ dataset_url = f"https://api.apify.com/v2/datasets/{dataset_id}/items?token={toke
 
 videos = requests.get(dataset_url).json()
 
-print(videos)
+video = videos[0]
+
+titulo = video.get("title", "")
+canal = video.get("channelName", "")
+inscritos = video.get("channelSubscribers", "")
+views = video.get("viewCount", "")
+descricao = video.get("description", "")
+
+prompt = f"""
+Você é um recrutador do RadarTV.
+
+Estamos procurando talentos para um projeto de TV no YouTube nas áreas de jornalismo, esportes e entretenimento.
+
+Analise o perfil abaixo e atribua uma nota de 0 a 100.
+
+Título do vídeo:
+{titulo}
+
+Canal:
+{canal}
+
+Inscritos:
+{inscritos}
+
+Views:
+{views}
+
+Descrição:
+{descricao}
+
+Responda neste formato:
+
+Score: XX
+
+Motivo: texto curto.
+"""
+
+response = model.generate_content(prompt)
+
+print(response.text)
+
+
