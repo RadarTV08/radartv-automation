@@ -16,7 +16,7 @@ jobs:
 
       - run: pip install requests
 
-- run: python scripts/main.py
-  env:
-    APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
-    GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      - run: python scripts/main.py
+        env:
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
