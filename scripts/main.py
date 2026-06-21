@@ -2,6 +2,7 @@ import requests
 import os
 import time
 
+
 token = os.environ["APIFY_TOKEN"]
 
 actor_id = "api-ninja/youtube-search-scraper"
@@ -26,9 +27,19 @@ print("Execução iniciada:", run_id)
 import requests
 import os
 import time
+import google.generativeai as genai
 
 token = os.environ["APIFY_TOKEN"]
 gemini_key = os.environ["GEMINI_API_KEY"]
+genai.configure(api_key=gemini_key)
+
+model = genai.GenerativeModel("gemini-2.5-flash")
+
+response = model.generate_content(
+    "Diga apenas: Gemini funcionando"
+)
+
+print(response.text)
 
 print("Gemini carregado com sucesso!")
 
