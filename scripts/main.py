@@ -28,6 +28,9 @@ import os
 import time
 
 token = os.environ["APIFY_TOKEN"]
+gemini_key = os.environ["GEMINI_API_KEY"]
+
+print("Gemini carregado com sucesso!")
 
 actor_id = "api-ninja/youtube-search-scraper"
 
