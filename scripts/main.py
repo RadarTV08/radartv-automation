@@ -1,4 +1,3 @@
-```python
 import requests
 import os
 import time
@@ -116,7 +115,6 @@ supabase.table("talentos").insert({
 }).execute()
 
 print("Talento salvo com sucesso!")
-```
 
 
 
