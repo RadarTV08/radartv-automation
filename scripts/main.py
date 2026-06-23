@@ -67,16 +67,17 @@ for termo, categoria in pesquisas:
     )
 
     videos = requests.get(dataset_url).json()
+    print(videos[0])
 
     print("Vídeos encontrados:", len(videos))
 
     for video in videos:
 
         titulo = video.get("title", "")
-        canal = video.get("channelName", "")
+        canal = video.get("channelName", "") or video.get("channel", "")
         inscritos = video.get("channelSubscribers", 0) or 0
         views = video.get("viewCount", 0) or 0
-        link = video.get("url", "")
+        link = video.get("url", "") or video.get("videoUrl", "")
 
         if canal == "":
             continue
@@ -104,21 +105,25 @@ for termo, categoria in pesquisas:
         if views > 100000:
             score += 10
 
-        supabase.table("talentos").insert({
-            "nome": canal,
-            "canal": canal,
-            "titulo_video": titulo,
-            "categoria": categoria,
-            "plataforma": "YouTube",
-            "inscritos": inscritos,
-            "views": views,
-            "link_video": link,
-            "score": score
-        }).execute()
+        try:
+    resposta = supabase.table("talentos").insert({
+        "nome": canal,
+        "canal": canal,
+        "titulo_video": titulo,
+        "categoria": categoria,
+        "plataforma": "YouTube",
+        "inscritos": inscritos,
+        "views": views,
+        "link_video": link,
+        "score": score
+    }).execute()
 
-        print("Talento salvo:", canal)
+    print("Talento salvo:", canal)
+    print(resposta.data)
 
-print("Fim da execução.")
+except Exception as e:
+    print("ERRO NO INSERT:")
+    print(e)
 
 
 
