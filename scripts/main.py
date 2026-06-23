@@ -79,7 +79,7 @@ Responda neste formato:
 Score: XX
 
 Motivo: texto curto.
-
+"""
    
     response = model.generate_content(prompt)
     resultado = response.text
