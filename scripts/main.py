@@ -97,6 +97,15 @@ for termo, categoria in pesquisas:
         score = 50
 
         if inscritos > 100000:
+        score += 20
+
+        if views > 10000:
+        score += 10
+
+        if views > 100000:
+        score += 10
+
+        if inscritos > 100000:
             score += 20
 
         if views > 10000:
