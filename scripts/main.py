@@ -82,37 +82,29 @@ for termo, categoria in pesquisas:
         if canal == "":
             continue
 
-        existente = (
-            supabase
-            .table("talentos")
-            .select("id")
-            .eq("canal", canal)
-            .execute()
-        )
+        # evita duplicados
+existente = (
+    supabase.table("talentos")
+    .select("id")
+    .eq("canal", canal)
+    .execute()
+)
 
-        if len(existente.data) > 0:
-            print("Já existe:", canal)
-            continue
+if len(existente.data) > 0:
+    print("Talento já existe:", canal)
+    continue
 
-        score = 50
+score = 50
 
-        if inscritos > 100000:
-        score += 20
+if inscritos > 100000:
+    score += 20
 
-        if views > 10000:
-        score += 10
+if views > 10000:
+    score += 10
 
-        if views > 100000:
-        score += 10
+if views > 100000:
+    score += 10
 
-        if inscritos > 100000:
-            score += 20
-
-        if views > 10000:
-            score += 10
-
-        if views > 100000:
-            score += 10
 try:
     resposta = supabase.table("talentos").insert({
         "nome": canal,
@@ -124,10 +116,9 @@ try:
         "views": views,
         "link_video": link,
         "score": score
-}).execute()
+    }).execute()
 
     print("Talento salvo:", canal)
-    print(resposta.data)
 
 except Exception as e:
     print("ERRO NO INSERT:")
