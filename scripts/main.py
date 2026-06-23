@@ -51,7 +51,7 @@ for termo, categoria in pesquisas:
 
     input_data = {
         "query": termo,
-        "maxResults": 20
+        "maxResults": 10
     }
 
     url = f"https://api.apify.com/v2/acts/{actor_id.replace('/','~')}/runs?token={token}"
