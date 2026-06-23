@@ -72,12 +72,12 @@ for termo, categoria in pesquisas:
 
     for video in videos:
 
-        print(video)
+        
         titulo = video.get("title", "")
-        canal = video.get("channelName", "") or video.get("channel", "")
-        inscritos = video.get("channelSubscribers", 0) or 0
-        views = video.get("viewCount", 0) or 0
-        link = video.get("url", "") or video.get("videoUrl", "")
+        canal = video.get("channelTitle", "")
+        inscritos = 0
+        views = int(video.get("viewCount", 0))
+        link = f"https://youtube.com/watch?v={video.get('videoId', '')}"
 
         if canal == "":
             continue
@@ -106,6 +106,15 @@ for termo, categoria in pesquisas:
         if views > 100000:
             score += 10
 
+        print(
+            "SALVANDO:",
+            canal,
+            titulo,
+            views
+        )
+            
+
+        
         try:
 
             resposta = supabase.table("talentos").insert({
