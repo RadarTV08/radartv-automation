@@ -43,25 +43,23 @@ dataset_url = f"https://api.apify.com/v2/datasets/{dataset_id}/items?token={toke
 
 videos = requests.get(dataset_url).json()
 
-# Primeiro vídeo
-video = videos[0]
+for video in videos:
 
-titulo = video.get("title", "")
-canal = video.get("channelName", "")
-inscritos = video.get("channelSubscribers", 0)
-views = video.get("viewCount", 0)
-descricao = video.get("description", "")
-link_video = video.get("url", "")
+    titulo = video.get("title", "")
+    canal = video.get("channelName", "")
+    inscritos = video.get("channelSubscribers", 0)
+    views = video.get("viewCount", 0)
+    descricao = video.get("description", "")
+    link = video.get("url", "")
 
-# Prompt do Gemini
-prompt = f"""
+    prompt = f"""
 Você é um recrutador do RadarTV.
 
-Estamos procurando talentos para um projeto de TV no YouTube.
+Estamos procurando talentos para um projeto de TV no YouTube nas áreas de jornalismo, esportes e entretenimento.
 
-Analise este perfil e atribua uma nota de 0 a 100.
+Analise o perfil abaixo e atribua uma nota de 0 a 100.
 
-Título:
+Título do vídeo:
 {titulo}
 
 Canal:
@@ -76,45 +74,52 @@ Views:
 Descrição:
 {descricao}
 
-Responda:
+Responda neste formato:
 
 Score: XX
 
 Motivo: texto curto.
-"""
 
-response = model.generate_content(prompt)
+   
+    response = model.generate_content(prompt)
+    resultado = response.text
 
-texto = response.text
+    score = 0
 
-print(texto)
+    for linha in resultado.split("\n"):
+        if "Score:" in linha:
+            try:
+                score = int(linha.replace("Score:", "").strip())
+            except:
+                score = 0
 
-# Extrai score
-score = 50
+    existente = (
+        supabase.table("talentos")
+        .select("id")
+        .eq("canal", canal)
+        .execute()
+    )
 
-for linha in texto.split("\n"):
-    if "Score:" in linha:
-        try:
-            score = int(linha.replace("Score:", "").strip())
-        except:
-            pass
+    if len(existente.data) == 0:
 
-# Salva no Supabase
-supabase.table("talentos").insert({
-    "nome": canal,
-    "canal": canal,
-    "titulo_video": titulo,
-    "categoria": "Jornalismo",
-    "plataforma": "YouTube",
-    "inscritos": inscritos,
-    "views": views,
-    "score": score,
-    "motivo": texto,
-    "status": "Não contatado",
-    "link_video": link_video
-}).execute()
+        supabase.table("talentos").insert({
+            "nome": canal,
+            "canal": canal,
+            "titulo_video": titulo,
+            "categoria": "Jornalismo",
+            "plataforma": "YouTube",
+            "inscritos": inscritos,
+            "views": views,
+            "link_video": link,
+            "score": score
+        }).execute()
 
-print("Talento salvo com sucesso!")
+        print("Talento salvo:", canal)
+
+    else:
+        print("Talento já existe:", canal)
+
+
 
 
 
