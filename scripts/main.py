@@ -75,51 +75,51 @@ for termo, categoria in pesquisas:
     for video in videos:
 
         
+        
         titulo = video.get("title", "")
         canal = video.get("channelTitle", "")
-        inscritos = 0
         descricao = video.get("description", "").lower()
         views = int(video.get("viewCount", 0))
         link = f"https://youtube.com/watch?v={video.get('videoId', '')}"
+        inscritos = 0
 
-        
-texto = (titulo + " " + descricao).lower()
-
-# só aceita vídeos pequenos
-if views > 2000:
-    continue
-
-# palavras obrigatórias
-palavras_chave = [
-    "jornalismo",
-    "faculdade",
-    "universidade",
-    "estudante",
-    "tcc",
-    "telejornal",
-    "reportagem"
-]
-
-if not any(palavra in texto for palavra in palavras_chave):
-    continue
-
-# ignora canais famosos
-bloqueados = [
-    "CNN Brasil",
-    "Band Jornalismo",
-    "SBT News",
-    "Record News",
-    "GloboNews",
-    "CazéTV",
-    "ESPN Brasil",
-    "SporTV"
-]
-
-if canal in bloqueados:
-    continue
-
-
+        # Ignora vídeos sem canal
         if canal == "":
+            continue
+
+        texto = (titulo + " " + descricao).lower()
+
+        # Só aceita vídeos pequenos
+        if views > 2000:
+            continue
+
+        # Só aceita conteúdos relacionados a jornalismo
+        palavras_chave = [
+            "jornalismo",
+            "faculdade",
+            "universidade",
+            "estudante",
+            "tcc",
+            "telejornal",
+            "reportagem"
+        ]
+
+        if not any(palavra in texto for palavra in palavras_chave):
+            continue
+
+        # Bloqueia grandes canais
+        bloqueados = [
+            "CNN Brasil",
+            "Band Jornalismo",
+            "SBT News",
+            "Record News",
+            "GloboNews",
+            "CazéTV",
+            "ESPN Brasil",
+            "SporTV"
+        ]
+
+        if canal in bloqueados:
             continue
 
         # Evita duplicados
@@ -134,8 +134,9 @@ if canal in bloqueados:
             print("Talento já existe:", canal)
             continue
 
-        # Score simples
         score = 50
+
+
 
         if inscritos > 100000:
             score += 20
