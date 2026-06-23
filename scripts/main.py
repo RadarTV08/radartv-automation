@@ -14,11 +14,13 @@ supabase = create_client(supabase_url, supabase_key)
 # Pesquisas
 pesquisas = [
     ("estudante de jornalismo", "Jornalismo"),
-    ("jornalista esportivo", "Esportes"),
-    ("comentarista esportivo", "Esportes"),
-    ("narrador esportivo", "Esportes"),
-    ("apresentador de TV", "Entretenimento")
+    ("faculdade de jornalismo", "Jornalismo"),
+    ("recém formado em jornalismo", "Jornalismo"),
+    ("TCC jornalismo", "Jornalismo"),
+    ("telejornal faculdade", "Jornalismo"),
+    ("reportagem faculdade jornalismo", "Jornalismo")
 ]
+
 
 actor_id = "api-ninja/youtube-search-scraper"
 
@@ -76,8 +78,46 @@ for termo, categoria in pesquisas:
         titulo = video.get("title", "")
         canal = video.get("channelTitle", "")
         inscritos = 0
+        descricao = video.get("description", "").lower()
         views = int(video.get("viewCount", 0))
         link = f"https://youtube.com/watch?v={video.get('videoId', '')}"
+
+        
+texto = (titulo + " " + descricao).lower()
+
+# só aceita vídeos pequenos
+if views > 2000:
+    continue
+
+# palavras obrigatórias
+palavras_chave = [
+    "jornalismo",
+    "faculdade",
+    "universidade",
+    "estudante",
+    "tcc",
+    "telejornal",
+    "reportagem"
+]
+
+if not any(palavra in texto for palavra in palavras_chave):
+    continue
+
+# ignora canais famosos
+bloqueados = [
+    "CNN Brasil",
+    "Band Jornalismo",
+    "SBT News",
+    "Record News",
+    "GloboNews",
+    "CazéTV",
+    "ESPN Brasil",
+    "SporTV"
+]
+
+if canal in bloqueados:
+    continue
+
 
         if canal == "":
             continue
