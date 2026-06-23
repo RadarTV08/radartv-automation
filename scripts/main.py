@@ -4,20 +4,32 @@ import time
 import google.generativeai as genai
 from supabase import create_client
 
-# Chaves
+# =====================
+# CHAVES
+# =====================
+
 token = os.environ["APIFY_TOKEN"]
 gemini_key = os.environ["GEMINI_API_KEY"]
 supabase_url = os.environ["SUPABASE_URL"]
 supabase_key = os.environ["SUPABASE_KEY"]
 
-# Supabase
+# =====================
+# SUPABASE
+# =====================
+
 supabase = create_client(supabase_url, supabase_key)
 
-# Gemini
+# =====================
+# GEMINI
+# =====================
+
 genai.configure(api_key=gemini_key)
 model = genai.GenerativeModel("gemini-2.5-flash")
 
-# Executa o actor do Apify
+# =====================
+# APIFY
+# =====================
+
 actor_id = "api-ninja/youtube-search-scraper"
 
 pesquisas = [
@@ -35,6 +47,8 @@ pesquisas = [
 
 for termo, categoria in pesquisas:
 
+    print("Pesquisando:", termo)
+
     input_data = {
         "query": termo,
         "maxResults": 20
@@ -45,11 +59,9 @@ for termo, categoria in pesquisas:
     response = requests.post(url, json=input_data)
     run = response.json()
 
-    run_id = run["data"]["id"]
     dataset_id = run["data"]["defaultDatasetId"]
 
-    print("Pesquisando:", termo)
-
+    # espera o actor terminar
     time.sleep(30)
 
     dataset_url = f"https://api.apify.com/v2/datasets/{dataset_id}/items?token={token}"
@@ -57,48 +69,37 @@ for termo, categoria in pesquisas:
     videos = requests.get(dataset_url).json()
 
     for video in videos:
-        ...
 
+        titulo = video.get("title", "")
+        canal = video.get("channelName", "")
+        inscritos = video.get("channelSubscribers", 0)
+        views = video.get("viewCount", 0)
+        descricao = video.get("description", "")
+        link = video.get("url", "")
 
-url = f"https://api.apify.com/v2/acts/{actor_id.replace('/','~')}/runs?token={token}"
+        # evita duplicados
+        existente = (
+            supabase
+            .table("talentos")
+            .select("id")
+            .eq("canal", canal)
+            .execute()
+        )
 
-response = requests.post(url, json=input_data)
-run = response.json()
+        if len(existente.data) > 0:
+            print("Talento já existe:", canal)
+            continue
 
-run_id = run["data"]["id"]
-dataset_id = run["data"]["defaultDatasetId"]
-
-print("Execução iniciada:", run_id)
-
-# Espera terminar
-time.sleep(30)
-
-# Obtém resultados
-dataset_url = f"https://api.apify.com/v2/datasets/{dataset_id}/items?token={token}"
-
-videos = requests.get(dataset_url).json()
-
-for video in videos:
-
-    titulo = video.get("title", "")
-    canal = video.get("channelName", "")
-    inscritos = video.get("channelSubscribers", 0)
-    views = video.get("viewCount", 0)
-    descricao = video.get("description", "")
-    link = video.get("url", "")
-
-    prompt = f"""
+        prompt = f"""
 Você é um recrutador do RadarTV.
 
-Estamos procurando talentos para um projeto de TV no YouTube nas áreas de jornalismo, esportes e entretenimento.
-
-Analise o perfil abaixo e atribua uma nota de 0 a 100.
-
-Título do vídeo:
-{titulo}
+Analise o perfil abaixo e dê uma nota de 0 a 100.
 
 Canal:
 {canal}
+
+Título:
+{titulo}
 
 Inscritos:
 {inscritos}
@@ -109,39 +110,36 @@ Views:
 Descrição:
 {descricao}
 
-Responda neste formato:
+Responda exatamente assim:
 
 Score: XX
-
 Motivo: texto curto.
 """
-   
-    response = model.generate_content(prompt)
-    resultado = response.text
 
-    score = 0
+        try:
+            resposta = model.generate_content(prompt)
+            texto = resposta.text
 
-    for linha in resultado.split("\n"):
-        if "Score:" in linha:
-            try:
-                score = int(linha.replace("Score:", "").strip())
-            except:
-                score = 0
+            score = 50
 
-    existente = (
-        supabase.table("talentos")
-        .select("id")
-        .eq("canal", canal)
-        .execute()
-    )
+            for linha in texto.split("\n"):
+                if "Score:" in linha:
+                    try:
+                        score = int(
+                            linha.replace("Score:", "").strip()
+                        )
+                    except:
+                        pass
 
-    if len(existente.data) == 0:
+        except Exception as e:
+            print("Erro Gemini:", e)
+            score = 50
 
         supabase.table("talentos").insert({
             "nome": canal,
             "canal": canal,
             "titulo_video": titulo,
-            "categoria": "Jornalismo",
+            "categoria": categoria,
             "plataforma": "YouTube",
             "inscritos": inscritos,
             "views": views,
@@ -151,8 +149,10 @@ Motivo: texto curto.
 
         print("Talento salvo:", canal)
 
-    else:
-        print("Talento já existe:", canal)
+        # evita limite do Gemini
+        time.sleep(5)
+
+print("Fim da execução.")
 
 
 
