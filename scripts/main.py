@@ -72,6 +72,7 @@ for termo, categoria in pesquisas:
 
     for video in videos:
 
+        print(video)
         titulo = video.get("title", "")
         canal = video.get("channelName", "") or video.get("channel", "")
         inscritos = video.get("channelSubscribers", 0) or 0
