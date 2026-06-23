@@ -104,8 +104,7 @@ for termo, categoria in pesquisas:
 
         if views > 100000:
             score += 10
-
-        try:
+try:
     resposta = supabase.table("talentos").insert({
         "nome": canal,
         "canal": canal,
@@ -116,7 +115,7 @@ for termo, categoria in pesquisas:
         "views": views,
         "link_video": link,
         "score": score
-    }).execute()
+}).execute()
 
     print("Talento salvo:", canal)
     print(resposta.data)
@@ -124,7 +123,6 @@ for termo, categoria in pesquisas:
 except Exception as e:
     print("ERRO NO INSERT:")
     print(e)
-
 
 
 
