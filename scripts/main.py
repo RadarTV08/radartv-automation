@@ -58,7 +58,6 @@ for termo, categoria in pesquisas:
 
     for video in videos:
         ...
-```
 
 
 url = f"https://api.apify.com/v2/acts/{actor_id.replace('/','~')}/runs?token={token}"
