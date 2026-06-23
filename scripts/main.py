@@ -42,10 +42,10 @@ for termo, categoria in pesquisas:
 
     run_id = run["data"]["id"]
 
-    # Espera o actor terminar
     status = "RUNNING"
 
     while status not in ["SUCCEEDED", "FAILED", "ABORTED"]:
+
         time.sleep(15)
 
         status_response = requests.get(
@@ -67,7 +67,6 @@ for termo, categoria in pesquisas:
     )
 
     videos = requests.get(dataset_url).json()
-    print(videos[0])
 
     print("Vídeos encontrados:", len(videos))
 
@@ -82,47 +81,52 @@ for termo, categoria in pesquisas:
         if canal == "":
             continue
 
-        # evita duplicados
-existente = (
-    supabase.table("talentos")
-    .select("id")
-    .eq("canal", canal)
-    .execute()
-)
+        # Evita duplicados
+        existente = (
+            supabase.table("talentos")
+            .select("id")
+            .eq("canal", canal)
+            .execute()
+        )
 
-if len(existente.data) > 0:
-    print("Talento já existe:", canal)
-    continue
+        if len(existente.data) > 0:
+            print("Talento já existe:", canal)
+            continue
 
-score = 50
+        # Score simples
+        score = 50
 
-if inscritos > 100000:
-    score += 20
+        if inscritos > 100000:
+            score += 20
 
-if views > 10000:
-    score += 10
+        if views > 10000:
+            score += 10
 
-if views > 100000:
-    score += 10
+        if views > 100000:
+            score += 10
 
-try:
-    resposta = supabase.table("talentos").insert({
-        "nome": canal,
-        "canal": canal,
-        "titulo_video": titulo,
-        "categoria": categoria,
-        "plataforma": "YouTube",
-        "inscritos": inscritos,
-        "views": views,
-        "link_video": link,
-        "score": score
-    }).execute()
+        try:
 
-    print("Talento salvo:", canal)
+            resposta = supabase.table("talentos").insert({
+                "nome": canal,
+                "canal": canal,
+                "titulo_video": titulo,
+                "categoria": categoria,
+                "plataforma": "YouTube",
+                "inscritos": inscritos,
+                "views": views,
+                "link_video": link,
+                "score": score
+            }).execute()
 
-except Exception as e:
-    print("ERRO NO INSERT:")
-    print(e)
+            print("Talento salvo:", canal)
+
+        except Exception as e:
+
+            print("ERRO NO INSERT:")
+            print(e)
+
+print("Fim da execução.")
 
 
 
