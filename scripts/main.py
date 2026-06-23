@@ -20,7 +20,6 @@ model = genai.GenerativeModel("gemini-2.5-flash")
 # Executa o actor do Apify
 actor_id = "api-ninja/youtube-search-scraper"
 
-```python
 pesquisas = [
     ("estudante de jornalismo", "Jornalismo"),
     ("jornalista esportivo", "Esportes"),
