@@ -20,10 +20,47 @@ model = genai.GenerativeModel("gemini-2.5-flash")
 # Executa o actor do Apify
 actor_id = "api-ninja/youtube-search-scraper"
 
-input_data = {
-    "query": "estudante de jornalismo",
-    "maxResults": 20
-}
+```python
+pesquisas = [
+    ("estudante de jornalismo", "Jornalismo"),
+    ("jornalista esportivo", "Esportes"),
+    ("comentarista esportivo", "Esportes"),
+    ("narrador esportivo", "Esportes"),
+    ("apresentador de TV", "Entretenimento"),
+    ("criador de conteúdo futebol", "Esportes"),
+    ("podcast futebol", "Esportes"),
+    ("humor brasileiro", "Entretenimento"),
+    ("cultura pop", "Entretenimento"),
+    ("cinema e séries", "Entretenimento")
+]
+
+for termo, categoria in pesquisas:
+
+    input_data = {
+        "query": termo,
+        "maxResults": 20
+    }
+
+    url = f"https://api.apify.com/v2/acts/{actor_id.replace('/','~')}/runs?token={token}"
+
+    response = requests.post(url, json=input_data)
+    run = response.json()
+
+    run_id = run["data"]["id"]
+    dataset_id = run["data"]["defaultDatasetId"]
+
+    print("Pesquisando:", termo)
+
+    time.sleep(30)
+
+    dataset_url = f"https://api.apify.com/v2/datasets/{dataset_id}/items?token={token}"
+
+    videos = requests.get(dataset_url).json()
+
+    for video in videos:
+        ...
+```
+
 
 url = f"https://api.apify.com/v2/acts/{actor_id.replace('/','~')}/runs?token={token}"
 
