@@ -1,21 +1,15 @@
 import requests
 import os
 import time
-import google.generativeai as genai
 from supabase import create_client
 
 # Chaves
 token = os.environ["APIFY_TOKEN"]
-gemini_key = os.environ["GEMINI_API_KEY"]
 supabase_url = os.environ["SUPABASE_URL"]
 supabase_key = os.environ["SUPABASE_KEY"]
 
 # Supabase
 supabase = create_client(supabase_url, supabase_key)
-
-# Gemini
-genai.configure(api_key=gemini_key)
-model = genai.GenerativeModel("gemini-2.5-flash")
 
 # Pesquisas
 pesquisas = [
@@ -40,51 +34,65 @@ for termo, categoria in pesquisas:
     url = f"https://api.apify.com/v2/acts/{actor_id.replace('/','~')}/runs?token={token}"
 
     response = requests.post(url, json=input_data)
-
-    try:
-        run = response.json()
-    except:
-        print("Erro ao ler resposta do Apify")
-        continue
+    run = response.json()
 
     if "data" not in run:
-        print("Erro do Apify:")
-        print(run)
+        print("Erro no Apify:", run)
+        continue
+
+    run_id = run["data"]["id"]
+
+    # Espera o actor terminar
+    status = "RUNNING"
+
+    while status not in ["SUCCEEDED", "FAILED", "ABORTED"]:
+        time.sleep(15)
+
+        status_response = requests.get(
+            f"https://api.apify.com/v2/actor-runs/{run_id}?token={token}"
+        ).json()
+
+        status = status_response["data"]["status"]
+
+        print("Status:", status)
+
+    if status != "SUCCEEDED":
+        print("Actor falhou.")
         continue
 
     dataset_id = run["data"]["defaultDatasetId"]
 
-    time.sleep(30)
-
-    dataset_url = f"https://api.apify.com/v2/datasets/{dataset_id}/items?token={token}"
+    dataset_url = (
+        f"https://api.apify.com/v2/datasets/{dataset_id}/items?token={token}"
+    )
 
     videos = requests.get(dataset_url).json()
+
+    print("Vídeos encontrados:", len(videos))
 
     for video in videos:
 
         titulo = video.get("title", "")
         canal = video.get("channelName", "")
-        inscritos = video.get("channelSubscribers", 0)
-        views = video.get("viewCount", 0)
-        descricao = video.get("description", "")
+        inscritos = video.get("channelSubscribers", 0) or 0
+        views = video.get("viewCount", 0) or 0
         link = video.get("url", "")
 
         if canal == "":
             continue
 
-        # evita duplicados
         existente = (
-            supabase.table("talentos")
+            supabase
+            .table("talentos")
             .select("id")
             .eq("canal", canal)
             .execute()
         )
 
         if len(existente.data) > 0:
-            print("Talento já existe:", canal)
+            print("Já existe:", canal)
             continue
 
-        # Score simples para não gastar Gemini
         score = 50
 
         if inscritos > 100000:
