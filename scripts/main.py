@@ -136,7 +136,7 @@ for termo, categoria in pesquisas:
             "fm",
             "am"
             "Cazé TV"
-            'Cortes do Casemiro Oficial"
+            "Cortes do Casemiro Oficial"
             "R7"
         ]
 
