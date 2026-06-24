@@ -76,50 +76,84 @@ for termo, categoria in pesquisas:
 
         
         
+        
         titulo = video.get("title", "")
         canal = video.get("channelTitle", "")
+        handle = video.get("channelHandle", "")
         descricao = video.get("description", "").lower()
-        views = int(video.get("viewCount", 0))
+
+        # Views
+        views_texto = str(video.get("viewCount", "0"))
+        views = int(views_texto.replace(",", "").replace(".", ""))
+
         link = f"https://youtube.com/watch?v={video.get('videoId', '')}"
         inscritos = 0
 
-        # Ignora vídeos sem canal
+        texto = (titulo + " " + descricao + " " + canal + " " + handle).lower()
+
+        # Canal vazio
         if canal == "":
             continue
 
-        texto = (titulo + " " + descricao).lower()
-
-        # Só aceita vídeos pequenos
+        # Máximo de 2 mil views
         if views > 2000:
             continue
 
-        # Só aceita conteúdos relacionados a jornalismo
+        # Temas obrigatórios
         palavras_chave = [
             "jornalismo",
+            "estudante",
             "faculdade",
             "universidade",
-            "estudante",
-            "tcc",
             "telejornal",
+            "tcc",
             "reportagem"
         ]
 
-        if not any(palavra in texto for palavra in palavras_chave):
+        if not any(p in texto for p in palavras_chave):
             continue
 
-        # Bloqueia grandes canais
+        # Bloqueia canais grandes e emissoras
         bloqueados = [
-            "CNN Brasil",
-            "Band Jornalismo",
-            "SBT News",
-            "Record News",
-            "GloboNews",
-            "CazéTV",
-            "ESPN Brasil",
-            "SporTV"
+            "globo",
+            "globonews",
+            "cnn",
+            "record",
+            "band",
+            "sbt",
+            "jovem pan",
+            "espn",
+            "sportv",
+            "cazétv",
+            "uol",
+            "terra",
+            "metrópoles",
+            "itatiaia",
+            "cbn",
+            "rádio",
+            "radio",
+            "tv",
+            "fm",
+            "am"
+            "Cazé TV"
+            'Cortes do Casemiro Oficial"
+            "R7"
         ]
 
-        if canal in bloqueados:
+        if any(p in texto for p in bloqueados):
+            continue
+
+        # Não aceita canais muito profissionais
+        palavras_proibidas = [
+            "oficial",
+            "news",
+            "podcast",
+            "ao vivo",
+            "live",
+            "entrevista exclusiva"
+        ]
+
+        if any(p in texto for p in palavras_proibidas):
             continue
 
         # Evita duplicados
@@ -131,8 +165,8 @@ for termo, categoria in pesquisas:
         )
 
         if len(existente.data) > 0:
-            print("Talento já existe:", canal)
             continue
+
 
         score = 50
 
