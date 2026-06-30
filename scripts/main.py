@@ -1,15 +1,21 @@
 import requests
 import os
 import time
+import json
+import google.generativeai as genai
 from supabase import create_client
 
 # Chaves
 token = os.environ["APIFY_TOKEN"]
 supabase_url = os.environ["SUPABASE_URL"]
 supabase_key = os.environ["SUPABASE_KEY"]
+gemini_key = os.environ["GEMINI_API_KEY"]
 
 # Supabase
 supabase = create_client(supabase_url, supabase_key)
+genai.configure(api_key=gemini_key)
+
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 # Pesquisas
 pesquisas = [
