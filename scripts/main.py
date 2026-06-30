@@ -134,10 +134,10 @@ for termo, categoria in pesquisas:
             "radio",
             "tv",
             "fm",
-            "am"
-            "Cazé TV"
-            "Cortes do Casemiro Oficial"
-            "R7"
+            "am",
+            "cazé tv",
+            "cortes do casemiro oficial",
+            "r7"
         ]
 
         if any(p in texto for p in bloqueados):
@@ -205,6 +205,7 @@ for termo, categoria in pesquisas:
             }).execute()
 
             print("Talento salvo:", canal)
+            print(resposta.data)
 
         except Exception as e:
 
