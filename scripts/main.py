@@ -7,38 +7,35 @@ from supabase_service import salvar_talento
 token = os.environ["APIFY_TOKEN"]
 
 
-PESQUISAS = [
-
-    # Jornalismo
-    ("estudante de jornalismo", "Jornalismo"),
-    ("faculdade de jornalismo", "Jornalismo"),
-    ("telejornal faculdade", "Jornalismo"),
-    ("reportagem faculdade", "Jornalismo"),
-    ("recém formado jornalismo", "Jornalismo"),
-
-]
+from searches import TODAS
 
 
-for termo, categoria in PESQUISAS:
+for categoria, pesquisas in TODAS:
 
-    videos = buscar_videos(
-        token,
-        termo,
-        max_results=20
-    )
+    print(f"\n========== {categoria.upper()} ==========\n")
 
-    for video in videos:
+    for termo in pesquisas:
 
-        print("--------------------------------")
-        print(video["titulo"])
+        videos = buscar_videos(
+            token,
+            termo,
+            max_results=20
+        )
 
-        analise = analisar(video)
+        for video in videos:
 
-        if not analise["salvar"]:
-            print("Descartado pelo Gemini.")
-            continue
+            print("--------------------------------")
+            print(video["titulo"])
 
-        analise["categoria"] = categoria
+            analise = analisar(video)
+
+            if not analise["salvar"]:
+                print("Descartado pelo Gemini.")
+                continue
+
+            analise["categoria"] = categoria
+
+            salvar_talento(video, analise)
 
         salvar_talento(video, analise)
 
